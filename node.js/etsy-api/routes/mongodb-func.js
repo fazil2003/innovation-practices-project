@@ -8,18 +8,34 @@ const db = require('./models/connect-db');
 var ObjectId = require('mongodb').ObjectId;
 var usersModel = require('./models/user-model');
 
-router.route('/insert').get(async (req, res)=>{
+// Insert a new data into the database
+router.route('/insert').post(async (req, res)=>{
+    
+    var dataUsername = req.body.username;
+    var dataPassword = req.body.password;
+    var dataEmail = req.body.email;
+    var dataApiKey = req.body.api_key;
+    var dataSharedSecret = req.body.shared_secret;
 
     try{
-        const hashedPassword = await bcrypt.hash('fazil123', saltRounds);
+        const hashedPassword = await bcrypt.hash(dataPassword, saltRounds);
         const insertData = await usersModel.create({
-            name: 'fazil',
-            password: hashedPassword
+            username: dataUsername,
+            password: hashedPassword,
+            email: dataEmail,
+            api_key: dataApiKey,
+            shared_secret: dataSharedSecret,
+            access_token: '',
+            refresh_token: '',
+            time_limit: 0,
+            last_updated: new Date()
         });
             
         insertData.save((err, doc) => {
             if (!err){
-                res.send('Data added successfully');
+                // Store the Cookie
+                res.cookie('email', dataEmail, { maxAge: 900000, httpOnly: true });
+                res.redirect('/require-access');
             }
             else{
                 res.send('error');

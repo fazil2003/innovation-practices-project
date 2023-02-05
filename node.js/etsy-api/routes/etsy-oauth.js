@@ -1,4 +1,27 @@
 const router = require('express').Router();
+const path = require('path');
+const db = require('./models/connect-db');
+var usersModel = require('../routes/models/user-model');
+
+router.route('/').get((req, res) => {
+    res.sendFile(path.join(__dirname, '../views/etsy-auth.html'));
+});
+
+router.route('/login').get((req, res) => {
+    res.sendFile(path.join(__dirname, '../views/user-login.html'));
+});
+
+router.route('/login-validate').post((req, res) => {
+    res.redirect(307, '/mongodb/insert');
+});
+
+router.route('/require-access').get((req, res)=>{
+    res.sendFile(path.join(__dirname, '../views/etsy-auth.html'));
+});
+
+router.route('/home').get((req, res)=>{
+    res.sendFile(path.join(__dirname, '../views/home.html'));
+});
 
 // Etsy API
 const etsyAPIKey = 'p8eqqvkph27mp9hrxebyx3re';
@@ -14,16 +37,28 @@ const codeChallenge = 'DSWlW2Abh-cf8CeLL8-g3hQ2WQyYdKyiu83u_s7nRhI';
 const codeChallengeMethod = 'S256';
 
 router.route('/request-code').get((req, res)=>{
-    res.redirect(
-        'https://www.etsy.com/oauth/connect?' +
-        'response_type=' + responseType +
-        '&redirect_uri=' + redirectUri +
-        '&scope=' + scope +
-        '&client_id=' + clientID +
-        '&state=' + state +
-        '&code_challenge=' + codeChallenge +
-        '&code_challenge_method=' + codeChallengeMethod
-    );
+
+    var userEmail = req.cookies.email
+    usersModel.find({$or:[{ 'email': userEmail }]}, (err, docs) => {
+        if (!err) {
+            // console.log(docs[0]['email']);
+            var apiKey = docs[0]['api_key'];
+            res.redirect(
+                'https://www.etsy.com/oauth/connect?' +
+                'response_type=' + responseType +
+                '&redirect_uri=' + redirectUri +
+                '&scope=' + scope +
+                '&client_id=' + apiKey +
+                '&state=' + state +
+                '&code_challenge=' + codeChallenge +
+                '&code_challenge_method=' + codeChallengeMethod
+            );
+
+        } else {
+            res.send("Failed to Authenticate.");
+        }
+    });    
+
 });
 
 
@@ -55,8 +90,22 @@ router.route('/request-token').get(async (req, res)=>{
         const tokenData = await response.json();
         // res.send(tokenData);
         // const jsonObj = JSON.parse(tokenData);
-        let urlToLoad = "/retrieve-data?access_token=" + tokenData['access_token'];
-        res.redirect(urlToLoad);
+
+        // let urlToLoad = "/retrieve-data?access_token=" + tokenData['access_token'];
+        // res.redirect(urlToLoad);
+
+        var myQuery = { email: req.cookies.email };
+        var newvalues = { $set: {
+            access_token: tokenData['access_token'],
+            refresh_token: tokenData['refresh_token'],
+            time_limit: tokenData['expires_in'],
+            last_updated: new Date()
+        } };
+        db.collection("users").updateOne(myQuery, newvalues, function(err, resDB) {
+            if (err) throw err;
+            res.redirect('/home');
+        });
+
     } else {
         res.send("Failed to get the data.");
     }
@@ -65,35 +114,46 @@ router.route('/request-token').get(async (req, res)=>{
 // Request 3 - Retrieve the Contents.
 router.route('/retrieve-data').get(async (req, res)=>{
     // We passed the access token in via the querystring
-    const { access_token } = req.query;
+    // const { access_token } = req.query;
 
-    // An Etsy access token includes your shop/user ID
-    // as a token prefix, so we can extract that too
-    const user_id = access_token.split('.')[0];
+    var userEmail = req.cookies.email
+    usersModel.find({$or:[{ 'email': userEmail }]}, async (err, docs) => {
+        if (!err) {
+            var access_token = docs[0]['access_token'];
+            var apiKey = docs[0]['api_key'];
+            // An Etsy access token includes your shop/user ID
+            // as a token prefix, so we can extract that too
+            const user_id = access_token.split('.')[0];
 
-    const requestOptions = {
-        headers: {
-            'x-api-key': clientID,
-            // Scoped endpoints require a bearer token
-            Authorization: `Bearer ${access_token}`,
+            const requestOptions = {
+                headers: {
+                    'x-api-key': apiKey,
+                    // Scoped endpoints require a bearer token
+                    Authorization: `Bearer ${access_token}`,
+                }
+            };
+
+            const response = await fetch(
+                `https://api.etsy.com/v3/application/shops/26785613/listings?state=draft`,
+                requestOptions
+            );
+
+            if (response.ok) {
+                const listData = await response.json();
+                // // Load the template with the first name as a template variable.
+                // res.render("welcome", {
+                //     first_name: userData.first_name
+                // });
+                res.send(listData);
+            } else {
+                res.send("oops");
+            }
+            
+        } else {
+            res.send("Failed to Authenticate.");
         }
-    };
+    });    
 
-    const response = await fetch(
-        `https://api.etsy.com/v3/application/shops/26785613/listings?state=draft`,
-        requestOptions
-    );
-
-    if (response.ok) {
-        const listData = await response.json();
-        // // Load the template with the first name as a template variable.
-        // res.render("welcome", {
-        //     first_name: userData.first_name
-        // });
-        res.send(listData);
-    } else {
-        res.send("oops");
-    }
 });
 
 // Request 4 - Generate new access token from the refresh token.
@@ -132,28 +192,40 @@ router.route('/get-token').get(async (req, res)=>{
 
 // Request 5 - Get the details of the shop.
 const shopName = "HappyByVimalYet";
-router.route('/get-shop-details').get(async (req, res)=>{
-    const { shop } = req.query;
+router.route('/get-shop-details').post(async (req, res)=>{
+    const { shop } = req.body;
 
-    const requestOptions = {
-        method: 'GET',
-        headers: {
-            'x-api-key': clientID,
+    var userEmail = req.cookies.email
+    usersModel.find({$or:[{ 'email': userEmail }]}, async (err, docs) => {
+        if (!err) {
+            var apiKey = docs[0]['api_key'];
+
+            const requestOptions = {
+                method: 'GET',
+                headers: {
+                    'x-api-key': apiKey,
+                }
+            };
+        
+            const response = await fetch(
+                "https://api.etsy.com/v3/application/shops?shop_name="+ shop +"&api_key=" + etsyAPIKey,
+                requestOptions
+            );
+        
+            if (response.ok) {
+                const listData = await response.json();
+                let shopID = (listData['results'][0]['shop_id'].toString());
+                // res.send(shopID);
+                res.redirect('/retrieve-data?shop=' + shopID)
+            } else {
+                res.send("oops");
+            }
+            
+        } else {
+            res.send("Failed to Authenticate.");
         }
-    };
+    });    
 
-    const response = await fetch(
-        "https://api.etsy.com/v3/application/shops?shop_name="+ shop +"&api_key=" + etsyAPIKey,
-        requestOptions
-    );
-
-    if (response.ok) {
-        const listData = await response.json();
-        let shopID = (listData['results'][0]['shop_id'].toString());
-        res.send(shopID);
-    } else {
-        res.send("oops");
-    }
 });
 
 module.exports = router;

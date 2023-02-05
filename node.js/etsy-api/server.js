@@ -2,6 +2,15 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+
+// create application/json parser
+var jsonParser = bodyParser.json();
+ 
+// create application/x-www-form-urlencoded parser
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
 require('dotenv').config();
 
 const app = express();
@@ -13,6 +22,12 @@ app.set('view engine', 'ejs');
 
 app.use(cors());
 app.use(express.json());
+app.use(cors({ origin: true, credentials: true }));
+
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// need cookieParser middleware before we can do anything with cookies
+app.use(cookieParser());
 
 // Etsy OAuth
 const etsyOAuth = require('./routes/etsy-oauth');
