@@ -1,118 +1,19 @@
-var express = require('express');
-var app = express();
+const router = require('express').Router();
 
-var bcrypt = require('bcrypt');
-
-const path = require('path');
-
-const keystring = 'p8eqqvkph27mp9hrxebyx3re';
+// Etsy API
+const etsyAPIKey = 'p8eqqvkph27mp9hrxebyx3re';
 const shared_secret = 'opmb58lswy';
-
-// LINKS
-// Etsy Your Apps Link: https://www.etsy.com/developers/your-apps
-// OLD URL: https://horal-extensions.000webhostapp.com
-
-// Require static assets from public folder
-app.use(express.static(path.join(__dirname, 'views')));
-app.set('view engine', 'ejs');
-
-
-// Test Requests.
-app.get('/', function(req, res){
-   res.send("Hello world!");
-});
-
-app.get('/test', function(req, res) {
-    res.sendFile(path.join(__dirname, '/views/index.html'));
-});
-
-app.get('/help', function(req, res) {
-    var q = req.query.code;
-    var p = req.query.code;
-    res.render('get', {'q': q, 'p': p});
-});
-
-app.get('/get', function(req, res){
-    var q = req.query.q;
-    var p = req.query.p;
-    res.render('get', {'q': q, 'p': p});
-});
-
-
-const MongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://127.0.0.1:27017';
-
-// Get the data from mongodb.
-app.get('/mongodb/get', function(req, res){
-    
-    MongoClient.connect(url, { useNewUrlParser: true })
-    .then((client) => {
-        const db = client.db('etsy-api');
-        const collection = db.collection('users');
-        return collection.find({}).toArray();
-    })
-    .then((response) => console.log(response))
-    .catch((error) => console.error(error));
-
-    res.send("Hello world!");
-});
-
-
-async function hashPassword(plainText) {
-    try {
-        const hashedPassword = await bcrypt.hash(plainText, 12);
-        return hashPassword;
-    } catch (err) {
-        console.log(err);
-        return "null";
-    }
-}
-
-
-function comparePassword(plaintextPassword, hash) {
-    bcyrpt.compare(plaintextPassword, hash)
-    .then(result => {return result})
-    .catch(err => {console.log(err)})
-}
-
-// Insert the data into the mongodb.
-app.get('/mongodb/insert', async function(req, res){
-
-    var password = "PassJohnDoe";
-    var encryptedPassword = await bcrypt.hash(password, 20);
-
-    var myobj = {
-        fullname: "John Doe",
-        username: "johndoe",
-        email: "johndoe@email.com",
-        password: encryptedPassword
-    };
-
-    MongoClient.connect(url, { useNewUrlParser: true })
-    .then((client) => {
-        const db = client.db('etsy-api');
-        const collection = db.collection('users');
-        return collection.insertOne(myobj)
-    })
-    .then((response) => console.log(response))
-    .catch((error) => console.error(error));
-
-    res.send("Hello world!");
-
-});
-
 
 // Request 1 - Request an Authorization Code.
 const responseType = 'code';
 const redirectUri = 'https://etsy.aloask.app';
 const scope = 'transactions_r%20listings_r';
-const clientID = keystring;
+const clientID = etsyAPIKey;
 const state = 'superstate';
 const codeChallenge = 'DSWlW2Abh-cf8CeLL8-g3hQ2WQyYdKyiu83u_s7nRhI';
 const codeChallengeMethod = 'S256';
 
-app.get('/request-code', function(req, res){
-    // res.redirect('https://etsy.aloask.app');
+router.route('/request-code').get((req, res)=>{
     res.redirect(
         'https://www.etsy.com/oauth/connect?' +
         'response_type=' + responseType +
@@ -122,14 +23,13 @@ app.get('/request-code', function(req, res){
         '&state=' + state +
         '&code_challenge=' + codeChallenge +
         '&code_challenge_method=' + codeChallengeMethod
-        );
+    );
 });
 
 
 // Request 2 - Request an Access Token.
 const clientVerifier = 'vvkdljkejllufrvbhgeiegrnvufrhvrffnkvcknjvfid';
-
-app.get("/request-token", async (req, res) => {
+router.route('/request-token').get(async (req, res)=>{
     // The req.query object has the query params that Etsy authentication sends
     // to this route. The authorization code is in the `code` param
     const authCode = req.query.code;
@@ -163,7 +63,7 @@ app.get("/request-token", async (req, res) => {
 });
 
 // Request 3 - Retrieve the Contents.
-app.get("/retrieve-data", async (req, res) => {
+router.route('/retrieve-data').get(async (req, res)=>{
     // We passed the access token in via the querystring
     const { access_token } = req.query;
 
@@ -196,9 +96,8 @@ app.get("/retrieve-data", async (req, res) => {
     }
 });
 
-
 // Request 4 - Generate new access token from the refresh token.
-app.get("/get-token", async (req, res) => {
+router.route('/get-token').get(async (req, res)=>{
     // The req.query object has the query params that Etsy authentication sends
     // to this route. The authorization code is in the `code` param
     const refreshToken = '417870418.eBihuefnLSDSAfzxvUZu5VKulKwg2daMlym0ixwrxxxPkJ9dK-AYpGoCMMEjlimEcnTrKAAKK0RqklNWfXp-Z53JVX';
@@ -231,9 +130,9 @@ app.get("/get-token", async (req, res) => {
     }
 });
 
+// Request 5 - Get the details of the shop.
 const shopName = "HappyByVimalYet";
-app.get('/get-shop-details', async function(req, res){
-
+router.route('/get-shop-details').get(async (req, res)=>{
     const { shop } = req.query;
 
     const requestOptions = {
@@ -244,7 +143,7 @@ app.get('/get-shop-details', async function(req, res){
     };
 
     const response = await fetch(
-        "https://api.etsy.com/v3/application/shops?shop_name="+ shop +"&api_key=" + keystring,
+        "https://api.etsy.com/v3/application/shops?shop_name="+ shop +"&api_key=" + etsyAPIKey,
         requestOptions
     );
 
@@ -255,7 +154,6 @@ app.get('/get-shop-details', async function(req, res){
     } else {
         res.send("oops");
     }
-
 });
 
-app.listen(3000);
+module.exports = router;
