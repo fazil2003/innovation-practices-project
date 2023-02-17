@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Poppins&display=swap');
+
+:root{
+  --color-primary: #1E90FF;
+  --color-secondary: #00BFFF;
+
+  --color-gradient-1: #43e97b;
+  --color-gradient-2: #38f9d7;
+
+  --font-normal: 'Poppins', sans-serif;
+  --font-bold: 'Montserrat', sans-serif;
+  --font-size: 18px;
+}
+
+html{
+  background: linear-gradient(90deg, var(--color-gradient-1) 0%, var(--color-gradient-2) 100%);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-normal);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+html, button, textarea, input{
+  font-family: var(--font-normal);
+  font-size: var(--font-size);
+}
+
+button, input, textarea{
+  border: none;
+  outline: none;
+}
+
+.heading{
+  margin: 10px;
+  font-family: var(--font-bold);
+  font-size: 40px;
+}
+
+button{
+  background: linear-gradient(90deg, var(--color-gradient-1) 0%, var(--color-gradient-2) 100%);
+  font-family: var(--font-bold);
+  min-width: 250px;
+  padding: 15px;
+  border-radius: 50px;
+  transition: 0.3s all ease;
+}
+
+button:hover{
+  background: linear-gradient(180deg, var(--color-gradient-1) 0%, var(--color-gradient-2) 100%);
+  transform: scale(0.9);
+  transition: 0.3s all ease;
+}
+
+a{
+  color: var(--color-primary);
+  text-decoration: none;
+  font-family: var(--font-bold);
+}
+
+/* Form */
+.login-form{
+  margin: auto;
+  margin-top: 100px;
+  width: 35%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 40px;
+}
+
+.login-form .form-input{
+  margin-top: 20px;
+}
+
+.login-form label{
+  font-family: var(--font-bold);
+}
+
+.login-form input{
+  margin-top: 5px;
+  border-radius: 5px;
+  border: 1px solid gray;
+  width: calc(100% - 20px);
+  padding: 10px;
+  font-size: var(--font-size);
+}
+
+.login-form input:focus{
+  border-width: 2px;
+  border-color: var(--color-primary);
+}
