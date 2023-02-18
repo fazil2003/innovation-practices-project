@@ -106,12 +106,13 @@ router.route('/shop/insert').get(async (req, res)=>{
 router.route('/shops/get').get((req, res)=>{
 
     let q = "";
+    let shopOwner = "johndoe";
     if(req.query.q){
 
         q = req.query.q;
         // console.log("q="+q);
 
-        shopsModel.find({}, (err, docs) => {
+        shopsModel.find({shop_owner: shopOwner}, (err, docs) => {
             if (!err) {
                 res.send(docs);
             } else {
@@ -121,7 +122,7 @@ router.route('/shops/get').get((req, res)=>{
 
     }
     else{
-        shopsModel.find({}, (err, docs) => {
+        shopsModel.find({shop_owner: shopOwner}, (err, docs) => {
             if (!err) {
                 res.send(docs);
             } else {
