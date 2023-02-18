@@ -22,7 +22,12 @@ router.route('/login').post((req, res)=>{
             }
             else{
                 if (await bcrypt.compare(req.body.password, results[0]['password']) ){
-                    res.send('success')
+                    // res.cookie('username', results[0]['username'], { maxAge: 900000, httpOnly: true });
+                    // res.cookie('email', results[0]['email'], { maxAge: 900000, httpOnly: true });
+                    // console.log(req.cookies.email);
+
+                    
+                    res.send("success:" + results[0]['email']);
                 }
                 else{
                     res.send('fail')
@@ -76,13 +81,13 @@ router.route('/insert').post(async (req, res)=>{
 });
 
 // Insert a new shop into the database
-router.route('/shop/insert').get(async (req, res)=>{
+router.route('/shops/insert').post(async (req, res)=>{
 
     try{
         const insertData = await shopsModel.create({
-            shop_name: 'Sample Shop',
-            shop_id: 123123,
-            shop_owner: 'johndoe',
+            shop_name: req.body.shop_name,
+            shop_id: req.body.shop_id,
+            shop_owner: req.body.shop_owner,
             last_synched: new Date()
         });
             
@@ -102,7 +107,7 @@ router.route('/shop/insert').get(async (req, res)=>{
     
 });
 
-// Insert a new data into the database
+// Get the shops.
 router.route('/shops/get').get((req, res)=>{
 
     let q = "";

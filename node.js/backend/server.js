@@ -33,6 +33,8 @@ app.use(cookieParser());
 const etsyOAuth = require('./routes/etsy-oauth');
 app.use('/', etsyOAuth);
 
+app.use('/etsy', etsyOAuth);
+
 // MongoDB Functions
 const mongoDBFunc = require('./routes/mongodb-func');
 app.use('/mongodb', mongoDBFunc);

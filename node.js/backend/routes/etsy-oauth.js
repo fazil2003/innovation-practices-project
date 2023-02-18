@@ -192,10 +192,12 @@ router.route('/get-token').get(async (req, res)=>{
 
 // Request 5 - Get the details of the shop.
 const shopName = "HappyByVimalYet";
-router.route('/get-shop-details').post(async (req, res)=>{
-    const { shop } = req.body;
+router.route('/get-shop-details').post(async (req, res) => {
 
-    var userEmail = req.cookies.email
+    const { shop } = req.body;
+    // var userEmail = req.cookies.email;
+    const {userEmail} = req.body;
+
     usersModel.find({$or:[{ 'email': userEmail }]}, async (err, docs) => {
         if (!err) {
             var apiKey = docs[0]['api_key'];
@@ -214,15 +216,21 @@ router.route('/get-shop-details').post(async (req, res)=>{
         
             if (response.ok) {
                 const listData = await response.json();
-                let shopID = (listData['results'][0]['shop_id'].toString());
-                // res.send(shopID);
-                res.redirect('/retrieve-data?shop=' + shopID)
+                if(listData['count'] > 0){
+                    let shopID = (listData['results'][0]['shop_id'].toString());
+                    res.send(shopID);
+                }
+                else{
+                    res.send("0");
+                }
+                // res.redirect('/retrieve-data?shop=' + shopID)
+                // res.send('success');
             } else {
-                res.send("oops");
+                res.send("0");
             }
             
         } else {
-            res.send("Failed to Authenticate.");
+            res.send("0");
         }
     });    
 

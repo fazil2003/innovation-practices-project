@@ -13,12 +13,19 @@ const Login = () =>{
 	const navigate = useNavigate();
 
 	function userLogin(){
+		let username = 'johndoe';
 		const parameters = { username: 'johndoe', password: 'johndoe' };
 		axios.post(defaultVariables['backend-url'] + 'mongodb/login', parameters)
 		.then(response => {
 			// alert(response.data)
-			if (response.data === 'success'){
+			if (response.data.startsWith("success:")){
+				let userEmail = response.data.split(":")[1];
+				localStorage.setItem("cookie_email", userEmail);
+				localStorage.setItem("cookie_username", username);
+				// alert(localStorage.getItem("cookie_email"));
+				// alert(localStorage.getItem("cookie_username"));
 				navigate("/home");
+				
 			}
 			else{
 				alert("Failed to login")

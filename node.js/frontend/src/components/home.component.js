@@ -61,6 +61,34 @@ const Home = () => {
 
     getData().then(response => setResult(response.data));
 
+    const addNewShop = () => {
+
+        const parameters = { userEmail: localStorage.getItem("cookie_email"), shop: 'HappyByVimalYet' };
+        const res = axios.post(defaultVariables['backend-url'] + 'etsy/get-shop-details/', parameters)
+        .then(response => {
+            if(response.data != "0"){
+                const parametersShopDetails = { shop_id: response.data, shop_name: 'HappyByVimalYet', shop_owner: localStorage.getItem("cookie_username") };
+                const res2 = axios.post(defaultVariables['backend-url'] + 'mongodb/shops/insert', parametersShopDetails)
+                .then(response2 => {
+                    alert("Shop added successfully.");
+                })
+                .catch(error2 => {
+                    alert("Failed to add the shop.");
+                });
+                // alert(response.data)
+            }
+            else{
+                alert("Invalid shop name.");
+            }
+            
+		})
+		.catch(error => {
+			alert("Error.")
+		});
+
+        return res;
+    }
+
     const shopsList = () =>{
         let size = result.length;
         return (
@@ -90,7 +118,7 @@ const Home = () => {
             <div className='content'>
                 <div style={{ display: 'flex' }} >
                     <p className='heading' style={{ flex: 2 }}>All Shops</p>
-                    <button>Add Shop</button>
+                    <button onClick={addNewShop}>Add Shop</button>
                 </div>
                 <div>
                 { shopsList() }
