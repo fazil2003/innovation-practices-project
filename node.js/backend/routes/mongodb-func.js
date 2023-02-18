@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 const db = require('./models/connect-db');
 var ObjectId = require('mongodb').ObjectId;
 var usersModel = require('./models/user-model');
+var shopsModel = require('./models/shop-model');
 
 // Insert a new data into the database
 router.route('/login').post((req, res)=>{
@@ -71,6 +72,65 @@ router.route('/insert').post(async (req, res)=>{
         console.log(error);
         res.status(500).send("Internal Server error Occured");
     }
+    
+});
+
+// Insert a new shop into the database
+router.route('/shop/insert').get(async (req, res)=>{
+
+    try{
+        const insertData = await shopsModel.create({
+            shop_name: 'Sample Shop',
+            shop_id: 123123,
+            shop_owner: 'johndoe',
+            last_synched: new Date()
+        });
+            
+        insertData.save((err, doc) => {
+            if (!err){
+                res.send("success")
+            }
+            else{
+                res.send('error');
+            }
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server error Occured");
+    }
+    
+});
+
+// Insert a new data into the database
+router.route('/shops/get').get((req, res)=>{
+
+    let q = "";
+    if(req.query.q){
+
+        q = req.query.q;
+        // console.log("q="+q);
+
+        shopsModel.find({}, (err, docs) => {
+            if (!err) {
+                res.send(docs);
+            } else {
+                console.log('Failed to retrieve the Course List: ' + err);
+            }
+        });    
+
+    }
+    else{
+        shopsModel.find({}, (err, docs) => {
+            if (!err) {
+                res.send(docs);
+            } else {
+                console.log('Failed to retrieve the Course List: ' + err);
+            }
+        });
+    }
+
+
     
 });
 

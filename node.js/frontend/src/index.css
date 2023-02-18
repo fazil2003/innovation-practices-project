@@ -45,6 +45,7 @@ button{
   background: linear-gradient(90deg, var(--color-gradient-1) 0%, var(--color-gradient-2) 100%);
   font-family: var(--font-bold);
   min-width: 250px;
+  height: 55px;
   padding: 15px;
   border-radius: 50px;
   transition: 0.3s all ease;
@@ -62,6 +63,75 @@ a{
   font-family: var(--font-bold);
 }
 
+
+/* Header */
+.header{
+  height: 80px;
+  width: 100%;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 2px 3px 5px rgb(200, 200, 200);
+}
+
+.header img{
+  width: 100%;
+  height: 60px;
+  margin-top: 10px;
+  object-fit: contain;
+}
+
+/* Container */
+.container{
+  margin-top: 100px;
+}
+
+.content{
+  margin: auto;
+  width: 80%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 40px;
+}
+
+/* Content List */
+.content-list{
+  margin-top: 10px;
+  padding: 24px;
+  border-radius: 10px;
+  border: 1px solid rgb(200, 200, 200);
+  box-shadow: 2px 3px 5px rgb(200, 200, 200);
+  display: flex;
+}
+
+.content-list img{
+  height: 24px;
+  object-fit: contain;
+}
+
+.content-list p {
+  margin: 0;
+}
+
+.content-list .flex-one{
+  flex: 1;
+}
+
+.content-list .flex-three{
+  flex: 3;
+}
+
+.content-list .name{
+  font-family: var(--font-bold);
+  font-size: 20px;
+}
+
+.content-list .date{
+  color: var(--color-primary);
+}
+
 /* Form */
 .login-form{
   margin: auto;
@@ -69,6 +139,7 @@ a{
   width: 35%;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 20px;
+  box-shadow: 2px 4px 8px rgb(150, 150, 150);
   padding: 40px;
 }
 

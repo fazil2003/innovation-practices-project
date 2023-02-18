@@ -18,7 +18,7 @@ const Login = () =>{
 		.then(response => {
 			// alert(response.data)
 			if (response.data === 'success'){
-				navigate("/register");
+				navigate("/home");
 			}
 			else{
 				alert("Failed to login")
