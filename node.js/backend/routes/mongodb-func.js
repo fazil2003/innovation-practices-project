@@ -9,6 +9,31 @@ var ObjectId = require('mongodb').ObjectId;
 var usersModel = require('./models/user-model');
 
 // Insert a new data into the database
+router.route('/login').post((req, res)=>{
+
+    usersModel.find({ username: req.body.username}, async function (err, results) {
+        if (err){
+            res.send("fail")
+        }
+        else{
+            if (!results.length){
+                res.send("fail")
+            }
+            else{
+                if (await bcrypt.compare(req.body.password, results[0]['password']) ){
+                    res.send('success')
+                }
+                else{
+                    res.send('fail')
+                }
+            }
+        }
+    });
+
+    
+});
+
+// Insert a new data into the database
 router.route('/insert').post(async (req, res)=>{
     
     var dataUsername = req.body.username;

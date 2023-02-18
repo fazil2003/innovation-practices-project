@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const path = require('path');
 const db = require('./models/connect-db');
-var usersModel = require('../routes/models/user-model');
+var usersModel = require('./models/user-model');
 
 router.route('/').get((req, res) => {
     res.sendFile(path.join(__dirname, '../views/etsy-auth.html'));

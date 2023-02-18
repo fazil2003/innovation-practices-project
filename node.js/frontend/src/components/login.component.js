@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
+import { useNavigate } from "react-router-dom";
 import ReactDOM from 'react-dom';
 import axios from 'axios';
+import defaultVariables from '../variables/variables';
 // import Popup from 'reactjs-popup';
 // import './components-styles/products.css'
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,9 +10,28 @@ import axios from 'axios';
 
 const Login = () =>{
 
+	const navigate = useNavigate();
+
+	function userLogin(){
+		const parameters = { username: 'johndoe', password: 'johndoe' };
+		axios.post(defaultVariables['backend-url'] + 'mongodb/login', parameters)
+		.then(response => {
+			// alert(response.data)
+			if (response.data === 'success'){
+				navigate("/register");
+			}
+			else{
+				alert("Failed to login")
+			}
+		})
+		.catch(error => {
+			alert("Error.")
+		});
+	}
+	
     return (
         <div className='container'>
-			<form className='login-form'>
+			<div className='login-form'>
 				<p className='heading'>Login</p>
 				<div className='form-input'>
 					<label>User ID / Email</label><br />
@@ -22,7 +43,7 @@ const Login = () =>{
 				</div>
 				<div className='form-input'>
 					<center>
-						<button>Login</button>
+						<button onClick={userLogin}>Login</button>
 					</center>
 				</div>
                 <div className='form-input'>
@@ -30,7 +51,7 @@ const Login = () =>{
                         Do you want to create new account? <a href='/register'>Register</a>
                     </center>
                 </div>
-			</form>
+			</div>
     	</div>
     )
     
