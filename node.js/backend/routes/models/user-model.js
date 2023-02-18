@@ -8,6 +8,7 @@ var usersSchema = new mongoose.Schema({
     email: String,
     api_key: String,
     shared_secret: String,
+    etsy_authorized: Boolean,
     access_token: String,
     refresh_token: String,
     time_limit: Number,

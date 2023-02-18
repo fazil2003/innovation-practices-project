@@ -1,6 +1,9 @@
 const router = require('express').Router();
 const path = require('path');
 const db = require('./models/connect-db');
+
+var defaultVariables = require('./variables/variables');
+
 var usersModel = require('./models/user-model');
 
 router.route('/').get((req, res) => {
@@ -12,7 +15,7 @@ router.route('/login').get((req, res) => {
 });
 
 router.route('/login-validate').post((req, res) => {
-    res.redirect(307, '/mongodb/insert');
+    res.redirect(307, '/mongodb/register');
 });
 
 router.route('/require-access').get((req, res)=>{
@@ -38,7 +41,10 @@ const codeChallengeMethod = 'S256';
 
 router.route('/request-code').get((req, res)=>{
 
-    var userEmail = req.cookies.email
+    // var userEmail = req.cookies.email
+    var userEmail = req.query.email;
+    res.cookie('email', userEmail, { maxAge: 900000, httpOnly: true });
+
     usersModel.find({$or:[{ 'email': userEmail }]}, (err, docs) => {
         if (!err) {
             // console.log(docs[0]['email']);
@@ -96,6 +102,7 @@ router.route('/request-token').get(async (req, res)=>{
 
         var myQuery = { email: req.cookies.email };
         var newvalues = { $set: {
+            etsy_authorized: true,
             access_token: tokenData['access_token'],
             refresh_token: tokenData['refresh_token'],
             time_limit: tokenData['expires_in'],
@@ -103,7 +110,7 @@ router.route('/request-token').get(async (req, res)=>{
         } };
         db.collection("users").updateOne(myQuery, newvalues, function(err, resDB) {
             if (err) throw err;
-            res.redirect('/home');
+            res.redirect(defaultVariables['frontend-url'] + "home");
         });
 
     } else {
@@ -116,7 +123,10 @@ router.route('/retrieve-data').get(async (req, res)=>{
     // We passed the access token in via the querystring
     // const { access_token } = req.query;
 
-    var userEmail = req.cookies.email
+    // var userEmail = req.cookies.email
+    var userEmail = req.query.email;
+    var shopID = req.query.shop_id;
+
     usersModel.find({$or:[{ 'email': userEmail }]}, async (err, docs) => {
         if (!err) {
             var access_token = docs[0]['access_token'];
@@ -134,7 +144,7 @@ router.route('/retrieve-data').get(async (req, res)=>{
             };
 
             const response = await fetch(
-                `https://api.etsy.com/v3/application/shops/26785613/listings?state=draft`,
+                'https://api.etsy.com/v3/application/shops/' + shopID + '/listings?state=draft',
                 requestOptions
             );
 
@@ -196,7 +206,7 @@ router.route('/get-shop-details').post(async (req, res) => {
 
     const { shop } = req.body;
     // var userEmail = req.cookies.email;
-    const {userEmail} = req.body;
+    const { userEmail } = req.body;
 
     usersModel.find({$or:[{ 'email': userEmail }]}, async (err, docs) => {
         if (!err) {
@@ -218,6 +228,7 @@ router.route('/get-shop-details').post(async (req, res) => {
                 const listData = await response.json();
                 if(listData['count'] > 0){
                     let shopID = (listData['results'][0]['shop_id'].toString());
+                    console.log(listData);
                     res.send(shopID);
                 }
                 else{

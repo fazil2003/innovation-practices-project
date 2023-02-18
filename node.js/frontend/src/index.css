@@ -115,11 +115,11 @@ a{
   margin: 0;
 }
 
-.content-list .flex-one{
+.flex-one{
   flex: 1;
 }
 
-.content-list .flex-three{
+.flex-three{
   flex: 3;
 }
 
@@ -154,13 +154,12 @@ a{
 .login-form input{
   margin-top: 5px;
   border-radius: 5px;
-  border: 1px solid gray;
+  border: 2px solid gray;
   width: calc(100% - 20px);
   padding: 10px;
   font-size: var(--font-size);
 }
 
 .login-form input:focus{
-  border-width: 2px;
   border-color: var(--color-primary);
 }

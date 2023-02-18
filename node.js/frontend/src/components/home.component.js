@@ -3,14 +3,30 @@ import { useNavigate } from "react-router-dom";
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 import defaultVariables from '../variables/variables';
+import Popup from './popups/shops.popup';
 
+
+const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric"}
+    return new Date(dateString).toLocaleDateString(undefined, options)
+}
+
+const timeDifference = (date) => {
+    let curr = new Date();
+    let seconds = Math.abs(new Date(date).getTime() - curr.getTime()) / 1000;
+    // return seconds;
+    alert(seconds);
+}
 
 const Shop = (props) => (
     <div class="content-list" title={props.shop.shop_name}>
         <img className='flex-one' src={process.env.PUBLIC_URL + '/images/icon-shop.png'} />
         <p className='name flex-three'>{props.shop.shop_name}</p>
         <p className='owner flex-three'>{props.shop.shop_owner}</p>
-        <p className='date flex-three'>{props.shop.last_synched}</p>
+        <p className='date flex-three'>{ formatDate(props.shop.last_synched) }</p>
+        <p className='flex-three'>
+            <button onClick={() => timeDifference(props.shop.last_synched)}>Get</button>
+        </p>
         {/* <p class="name flex-three">{props.product.name}</p>
         <p class="description flex-three">{props.product.description}</p>
         <p class="price flex-one">{props.product.price}</p>
@@ -55,22 +71,25 @@ const Home = () => {
 
 
     const getData = () =>{
-        const res = axios.get(defaultVariables['backend-url'] + 'mongodb/shops/get/?q=' + query);
+        const res = axios.get(defaultVariables['backend-url'] + 'mongodb/shops/get/?shop_owner=' + localStorage.getItem("cookie_username") + '&q=' + query);
         return res;
     }
 
     getData().then(response => setResult(response.data));
 
-    const addNewShop = () => {
+    const addNewShop = (event) => {
 
-        const parameters = { userEmail: localStorage.getItem("cookie_email"), shop: 'HappyByVimalYet' };
+        event.preventDefault();
+
+        const parameters = { userEmail: localStorage.getItem("cookie_email"), shop: event.target[0].value };
         const res = axios.post(defaultVariables['backend-url'] + 'etsy/get-shop-details/', parameters)
         .then(response => {
             if(response.data != "0"){
-                const parametersShopDetails = { shop_id: response.data, shop_name: 'HappyByVimalYet', shop_owner: localStorage.getItem("cookie_username") };
+                const parametersShopDetails = { shop_id: response.data, shop_name: event.target[0].value, shop_owner: localStorage.getItem("cookie_username") };
                 const res2 = axios.post(defaultVariables['backend-url'] + 'mongodb/shops/insert', parametersShopDetails)
                 .then(response2 => {
                     alert("Shop added successfully.");
+                    setShopName("");
                 })
                 .catch(error2 => {
                     alert("Failed to add the shop.");
@@ -86,6 +105,7 @@ const Home = () => {
 			alert("Error.")
 		});
 
+        setButtonPopup(false);
         return res;
     }
 
@@ -118,8 +138,50 @@ const Home = () => {
             <div className='content'>
                 <div style={{ display: 'flex' }} >
                     <p className='heading' style={{ flex: 2 }}>All Shops</p>
-                    <button onClick={addNewShop}>Add Shop</button>
+                    <button onClick = { () => {
+                            setButtonPopup(true);
+                            setShopName("");
+                            }
+                        }
+                        >Add Shop</button>
                 </div>
+
+                <div>
+                    <Popup trigger={buttonPopup} setTrigger={setButtonPopup} >
+                        <center>
+                            <p className='heading'>Add Shop</p>
+                            
+                            <form onSubmit={addNewShop}>
+
+                                <p className='label'>Shop Name:</p>
+                                <input className='text-field' type='text' placeholder='Shop Name' defaultValue={shopName} required />
+                                <br /><br />
+
+                                {/* <p className='label'>Product Description:</p>
+                                <input className='text-field' type='text' placeholder='Product Description' defaultValue={productDescription} required />
+
+                                <p className='label'>Product Price:</p>
+                                <input className='text-field' type='number' placeholder='Product Price' defaultValue={productPrice} required />
+
+                                <p className='label'>Product Stocks:</p>
+                                <input className='text-field' type='number' placeholder='Product Stocks' defaultValue={productStocks} required /> */}
+
+                                <button className='button'>Add/Update</button>
+
+                            </form>
+
+                        </center>
+                    </Popup>
+                </div>
+
+                <div style={{ paddingLeft: '24px', paddingRight: '24px', display: 'flex', marginBottom: '-10px', textAlign: 'left'}}>
+                    <p className='flex-one'>Icon</p>
+                    <p className='flex-three'>Shop name</p>
+                    <p className='flex-three'>Owner</p>
+                    <p className='flex-three'>Last synched</p>
+                    <p className='flex-three'>Listings</p>
+                </div>
+
                 <div>
                 { shopsList() }
                 </div>

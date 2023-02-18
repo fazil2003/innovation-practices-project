@@ -12,9 +12,11 @@ const Login = () =>{
 
 	const navigate = useNavigate();
 
-	function userLogin(){
-		let username = 'johndoe';
-		const parameters = { username: 'johndoe', password: 'johndoe' };
+	function userLogin(event){
+		event.preventDefault();
+		let username = event.target[0].value;
+		let password = event.target[1].value;
+		const parameters = { username: username, password: password };
 		axios.post(defaultVariables['backend-url'] + 'mongodb/login', parameters)
 		.then(response => {
 			// alert(response.data)
@@ -27,8 +29,14 @@ const Login = () =>{
 				navigate("/home");
 				
 			}
+			else if (response.data.startsWith("authorize:")){
+				let userEmail = response.data.split(":")[1];
+				localStorage.setItem("cookie_email", userEmail);
+				localStorage.setItem("cookie_username", username);
+				navigate("/authorize");
+			}
 			else{
-				alert("Failed to login")
+				alert("Invalid credentials.")
 			}
 		})
 		.catch(error => {
@@ -38,19 +46,19 @@ const Login = () =>{
 	
     return (
         <div className='container'>
-			<div className='login-form'>
+			<form className='login-form' onSubmit={userLogin} >
 				<p className='heading'>Login</p>
 				<div className='form-input'>
-					<label>User ID / Email</label><br />
-					<input type='text' placeholder='User ID / Email' />
+					<label>Username</label><br />
+					<input type='text' placeholder='Username' />
 				</div>
 				<div className='form-input'>
 					<label>Password</label><br />
-					<input type='password' placeholder='User ID / Email' />
+					<input type='password' placeholder='Password' />
 				</div>
 				<div className='form-input'>
 					<center>
-						<button onClick={userLogin}>Login</button>
+						<button>Login</button>
 					</center>
 				</div>
                 <div className='form-input'>
@@ -58,7 +66,7 @@ const Login = () =>{
                         Do you want to create new account? <a href='/register'>Register</a>
                     </center>
                 </div>
-			</div>
+			</form>
     	</div>
     )
     

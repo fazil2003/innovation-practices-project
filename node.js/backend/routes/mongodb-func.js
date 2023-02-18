@@ -9,7 +9,7 @@ var ObjectId = require('mongodb').ObjectId;
 var usersModel = require('./models/user-model');
 var shopsModel = require('./models/shop-model');
 
-// Insert a new data into the database
+// Check the login credentials of the user.
 router.route('/login').post((req, res)=>{
 
     usersModel.find({ username: req.body.username}, async function (err, results) {
@@ -26,8 +26,13 @@ router.route('/login').post((req, res)=>{
                     // res.cookie('email', results[0]['email'], { maxAge: 900000, httpOnly: true });
                     // console.log(req.cookies.email);
 
+                    if(results[0]['etsy_authorized']){
+                        res.send("success:" + results[0]['email']);
+                    }
+                    else{
+                        res.send("authorize:" + results[0]['email']);
+                    }
                     
-                    res.send("success:" + results[0]['email']);
                 }
                 else{
                     res.send('fail')
@@ -39,8 +44,8 @@ router.route('/login').post((req, res)=>{
     
 });
 
-// Insert a new data into the database
-router.route('/insert').post(async (req, res)=>{
+// Register the new user.
+router.route('/register').post(async (req, res)=>{
     
     var dataUsername = req.body.username;
     var dataPassword = req.body.password;
@@ -55,6 +60,7 @@ router.route('/insert').post(async (req, res)=>{
             password: hashedPassword,
             email: dataEmail,
             api_key: dataApiKey,
+            etsy_authorized: false,
             shared_secret: dataSharedSecret,
             access_token: '',
             refresh_token: '',
@@ -65,8 +71,9 @@ router.route('/insert').post(async (req, res)=>{
         insertData.save((err, doc) => {
             if (!err){
                 // Store the Cookie
-                res.cookie('email', dataEmail, { maxAge: 900000, httpOnly: true });
-                res.redirect('/require-access');
+                // res.cookie('email', dataEmail, { maxAge: 900000, httpOnly: true });
+                // res.redirect('/require-access');
+                res.send("success");
             }
             else{
                 res.send('error');
@@ -111,7 +118,7 @@ router.route('/shops/insert').post(async (req, res)=>{
 router.route('/shops/get').get((req, res)=>{
 
     let q = "";
-    let shopOwner = "johndoe";
+    let shopOwner = req.query.shop_owner;
     if(req.query.q){
 
         q = req.query.q;
