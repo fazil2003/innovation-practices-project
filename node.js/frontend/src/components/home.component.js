@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from "react-router-dom";
 import ReactDOM from 'react-dom';
 import axios from 'axios';
@@ -18,6 +18,51 @@ const timeDifference = (date) => {
     alert(seconds);
 }
 
+const viewListings = (navigate, shopID) => {
+    var username = localStorage.getItem("cookie_username");
+    // navigate("/listings/" + shopID);
+
+    // 1. Check the validity of the Tokens.
+    const parameters = { username: username };
+    axios.post(defaultVariables['backend-url'] + 'mongodb/token/validity', parameters)
+    .then(response => {
+        if(response.data.startsWith("refresh:")){
+            let refreshToken = response.data.split(":")[1];
+            // 2. Get the API Key.
+            axios.post(defaultVariables['backend-url'] + 'mongodb/token/get/api_key', parameters)
+            .then(apiKey => {
+                // 3. Get the new Tokens.
+                let url = defaultVariables['backend-url'] + 'etsy/get-token?refresh_token=' + refreshToken + '&api_key=' + apiKey.data;
+                alert(url);
+                axios.get(defaultVariables['backend-url'] + 'etsy/get-token?refresh_token=' + refreshToken + '&api_key=' + apiKey.data)
+                .then(newTokens => {
+                    // 4. Update the Tokens in the Database.
+                    const tokenParameters = {
+                        username: username,
+                        access_token: newTokens.data['access_token'],
+                        refresh_token: newTokens.data['refresh_token'],
+                        time_limit: newTokens.data['expires_in']
+                    };
+                    axios.post(defaultVariables['backend-url'] + 'mongodb/update-tokens', tokenParameters)
+                    .then(response4 => {
+                        alert("Tokens updated successfully.");
+                    })
+                    .catch(error => {});
+                })
+                .catch(error => {});
+            })
+            .catch(error => {});
+        }
+        else {
+            // alert(response.data.split(":")[1])
+            navigate("/listings/" + shopID);
+        }
+    })
+    .catch(error => {
+        alert("Error.")
+    });
+}
+
 const Shop = (props) => (
     <div class="content-list" title={props.shop.shop_name}>
         <img className='flex-one' src={process.env.PUBLIC_URL + '/images/icon-shop.png'} />
@@ -25,8 +70,11 @@ const Shop = (props) => (
         <p className='owner flex-three'>{props.shop.shop_owner}</p>
         <p className='date flex-three'>{ formatDate(props.shop.last_synched) }</p>
         <p className='flex-three'>
-            <button onClick={() => timeDifference(props.shop.last_synched)}>Get</button>
+            <button onClick={() => viewListings(props.navigate, props.shop.shop_id)}>Get</button>
         </p>
+        {/* <p className='flex-three'>
+            <button onClick={() => timeDifference(props.shop.last_synched)}>Get</button>
+        </p> */}
         {/* <p class="name flex-three">{props.product.name}</p>
         <p class="description flex-three">{props.product.description}</p>
         <p class="price flex-one">{props.product.price}</p>
@@ -69,13 +117,20 @@ const Home = () => {
     const [shopOwner, setShopOwner] = useState("");
     const [lastSynched, setLastSynched] = useState("");
 
+    const navigate = useNavigate();
 
     const getData = () =>{
         const res = axios.get(defaultVariables['backend-url'] + 'mongodb/shops/get/?shop_owner=' + localStorage.getItem("cookie_username") + '&q=' + query);
         return res;
     }
 
-    getData().then(response => setResult(response.data));
+    // UseEffect to avoid Axios to fetch the data continuously.
+    useEffect(() => {
+        const dataTimer = setInterval(() => {
+            getData().then(response => setResult(response.data));
+        }, 1000);
+        return () => clearInterval(dataTimer);
+    });
 
     const addNewShop = (event) => {
 
@@ -118,6 +173,7 @@ const Home = () => {
                         return <Shop
                                     shop = {currentShop}
                                     value = {query}
+                                    navigate = {navigate}
                                     setButtonPopup = {setButtonPopup}
                                     setShopID = {setShopID}
                                     setShopName = {setShopName}

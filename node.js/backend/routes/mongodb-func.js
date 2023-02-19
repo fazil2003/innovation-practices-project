@@ -147,4 +147,78 @@ router.route('/shops/get').get((req, res)=>{
     
 });
 
+// Check the validity of access token.
+router.route('/token/validity').post((req, res) => {
+
+    let username = req.body.username;
+
+    usersModel.find({ username: username}, async function (err, results) {
+        if (err){
+            res.send("fail")
+        }
+        else{
+            if (!results.length){
+                res.send("fail")
+            }
+            else{
+                let currentTime = new Date();
+                let secondsDifference = Math.abs(new Date(results[0]['last_updated']).getTime() - currentTime.getTime()) / 1000;
+                if (secondsDifference > results[0]['time_limit']){
+                    res.send("refresh:" + results[0]['refresh_token']);
+                }
+                else{
+                    res.send("access:" + results[0]['access_token']);
+                }
+            }
+        }
+    });
+
+});
+
+// Check the validity of access token.
+router.route('/token/get/api_key').post((req, res) => {
+
+    let username = req.body.username;
+
+    usersModel.find({ username: username}, async function (err, results) {
+        if (err){
+            res.send("fail")
+        }
+        else{
+            if (!results.length){
+                res.send("fail")
+            }
+            else{
+                res.send(results[0]['api_key']);
+            }
+        }
+    });
+
+});
+
+// Update the Access tokens.
+router.route('/update-tokens').post(async (req, res)=>{
+
+    try{
+        var myQuery = { username: req.body.username };
+        var newValues = { $set:
+            {
+                access_token: req.body.access_token,
+                refresh_token: req.body.refresh_token,
+                time_limit: req.body.time_limit,
+                last_updated: new Date()
+            }
+        };
+        db.collection("users").updateOne(myQuery, newValues, function(err, resMongo) {
+            if (err) throw err;
+            res.send("success");
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server error Occured");
+    }
+    
+});
+
 module.exports = router;

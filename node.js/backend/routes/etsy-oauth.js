@@ -154,7 +154,7 @@ router.route('/retrieve-data').get(async (req, res)=>{
                 // res.render("welcome", {
                 //     first_name: userData.first_name
                 // });
-                res.send(listData);
+                res.send(listData['results']);
             } else {
                 res.send("oops");
             }
@@ -170,13 +170,16 @@ router.route('/retrieve-data').get(async (req, res)=>{
 router.route('/get-token').get(async (req, res)=>{
     // The req.query object has the query params that Etsy authentication sends
     // to this route. The authorization code is in the `code` param
-    const refreshToken = '417870418.eBihuefnLSDSAfzxvUZu5VKulKwg2daMlym0ixwrxxxPkJ9dK-AYpGoCMMEjlimEcnTrKAAKK0RqklNWfXp-Z53JVX';
+    // const refreshToken = '417870418.eBihuefnLSDSAfzxvUZu5VKulKwg2daMlym0ixwrxxxPkJ9dK-AYpGoCMMEjlimEcnTrKAAKK0RqklNWfXp-Z53JVX';
+    const refreshToken = req.query.refresh_token;
+    const api_key = req.query.api_key;
     const tokenUrl = 'https://api.etsy.com/v3/public/oauth/token';
+
     const requestOptions = {
         method: 'POST',
         body: JSON.stringify({
             grant_type: 'refresh_token',
-            client_id: clientID,
+            client_id: api_key,
             refresh_token: refreshToken,
         }),
         headers: {
