@@ -8,7 +8,7 @@ import Popup from './popups/shops.popup';
 const Authorize = () => {
 
     const authorizeWithEtsy = () => {
-        window.location.href = defaultVariables['backend-url'] + "etsy/request-code?email=" + localStorage.getItem('cookie_email');
+        window.location.href = defaultVariables['backend-url'] + "etsy/request-code?current_shop_id=" + localStorage.getItem('current_shop_id');
     }
 
     return (

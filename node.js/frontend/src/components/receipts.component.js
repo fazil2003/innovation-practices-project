@@ -6,16 +6,16 @@ import defaultVariables from '../variables/variables';
 import Popup from './popups/shops.popup';
 
 
-const Listing = (props) => (
-    <div class="content-list" title={props.listing.title}>
-        <p className='flex-one'>{props.listing.listing_id}</p>
-        <p className='flex-one name'>{props.listing.title}</p>
-        <p className='flex-one'>{props.listing.description}</p>
-        <p className='flex-one date'>{props.listing.state}</p>
+const Receipt = (props) => (
+    <div class="content-list" title={props.receipt.name}>
+        <p className='flex-one'>{props.receipt.receipt_id}</p>
+        <p className='flex-one name'>{props.receipt.seller_email}</p>
+        <p className='flex-one'>{props.receipt.buyer_email}</p>
+        <p className='flex-one date'>{props.receipt.name}</p>
     </div>
 )
 
-const Listings = (props) => {
+const Receipts = (props) => {
 
     // Used for Searching
     const [query, setQuery] = useState("");
@@ -36,7 +36,7 @@ const Listings = (props) => {
     const getData = () =>{
         // let url = defaultVariables['backend-url'] + 'etsy/retrieve-data/?email=' + localStorage.getItem("cookie_email") + '&shop_id='+ shop_id +'&q=' + query;
         // alert(url);
-        const res = axios.get(defaultVariables['backend-url'] + 'etsy/retrieve-data/?shop_id='+ shop_id +'&q=' + query);
+        const res = axios.get(defaultVariables['backend-url'] + 'etsy/retrieve-receipts/?shop_id='+ shop_id +'&q=' + query);
         return res;
     }
 
@@ -48,14 +48,14 @@ const Listings = (props) => {
         return () => clearInterval(dataTimer);
     });
 
-    const fetchListings = () =>{
+    const fetchReceipts = () =>{
         let size = result.length;
         return (
             <div>
                 {
-                    result.slice(0, size).map(currentListing => {
-                        return <Listing
-                                    listing = {currentListing}
+                    result.slice(0, size).map(currentReceipt => {
+                        return <Receipt
+                                    receipt = {currentReceipt}
                                     value = {query}
                                 />;
                     })
@@ -68,14 +68,14 @@ const Listings = (props) => {
         <div className='container'>
             <div className='content'>
                 <div style={{ display: 'flex' }} >
-                    <p className='heading'>Listings</p>
+                    <p className='heading'>Receipts</p>
                 </div>
                 <div>
-                { fetchListings() }
+                { fetchReceipts() }
                 </div>
 			</div>
         </div>
     )
 }
 
-export default Listings;
+export default Receipts;

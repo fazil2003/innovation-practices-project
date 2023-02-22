@@ -19,15 +19,11 @@ const Register = () => {
 		let username = event.target[0].value;
 		let password = event.target[1].value;
 		let email = event.target[2].value;
-		let api_key = event.target[3].value;
-		let shared_secret = event.target[4].value;
 
 		const parameters = {
 			username: username,
 			password: password,
-			email: email,
-			api_key: api_key,
-			shared_secret: shared_secret
+			email: email
 		};
 
 		axios.post(defaultVariables['backend-url'] + 'mongodb/register', parameters)
@@ -37,7 +33,7 @@ const Register = () => {
 				localStorage.setItem("cookie_username", username);
 				// alert(localStorage.getItem("cookie_email"));
 				// alert(localStorage.getItem("cookie_username"));
-				navigate("/authorize");
+				navigate("/home");
 				
 			}
 			else{
@@ -64,14 +60,6 @@ const Register = () => {
 				<div className='form-input'>
 					<label>Email</label><br />
 					<input type='email' placeholder='Email' />
-				</div>
-				<div className='form-input'>
-					<label>API Key</label><br />
-					<input type='text' placeholder='API Key' />
-				</div>
-				<div className='form-input'>
-					<label>Shared Secret</label><br />
-					<input type='text' placeholder='Shared Secret' />
 				</div>
 				<div className='form-input'>
 					<center>

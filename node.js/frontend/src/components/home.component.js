@@ -19,26 +19,27 @@ const timeDifference = (date) => {
 }
 
 const viewListings = (navigate, shopID) => {
-    var username = localStorage.getItem("cookie_username");
-    // navigate("/listings/" + shopID);
 
     // 1. Check the validity of the Tokens.
-    const parameters = { username: username };
+    const parameters = { shop_id: shopID };
     axios.post(defaultVariables['backend-url'] + 'mongodb/token/validity', parameters)
     .then(response => {
-        if(response.data.startsWith("refresh:")){
-            let refreshToken = response.data.split(":")[1];
-            // 2. Get the API Key.
-            axios.post(defaultVariables['backend-url'] + 'mongodb/token/get/api_key', parameters)
-            .then(apiKey => {
-                // 3. Get the new Tokens.
-                let url = defaultVariables['backend-url'] + 'etsy/get-token?refresh_token=' + refreshToken + '&api_key=' + apiKey.data;
-                alert(url);
-                axios.get(defaultVariables['backend-url'] + 'etsy/get-token?refresh_token=' + refreshToken + '&api_key=' + apiKey.data)
+        if (response.data.response_type == "success"){
+
+            if(response.data.token_type == "refresh"){
+
+                let refreshToken = response.data.token_data;
+                let apiKey = response.data.api_key;
+
+                // 2. Get the new Tokens.
+                let url = defaultVariables['backend-url'] + 'etsy/get-token?refresh_token=' + refreshToken + '&api_key=' + apiKey;
+                // alert(url);
+                axios.get(url)
                 .then(newTokens => {
-                    // 4. Update the Tokens in the Database.
+
+                    // 3. Update the Tokens in the Database.
                     const tokenParameters = {
-                        username: username,
+                        shop_id: shopID,
                         access_token: newTokens.data['access_token'],
                         refresh_token: newTokens.data['refresh_token'],
                         time_limit: newTokens.data['expires_in']
@@ -46,17 +47,19 @@ const viewListings = (navigate, shopID) => {
                     axios.post(defaultVariables['backend-url'] + 'mongodb/update-tokens', tokenParameters)
                     .then(response4 => {
                         alert("Tokens updated successfully.");
+                        navigate("/listings/" + shopID);
                     })
                     .catch(error => {});
                 })
                 .catch(error => {});
-            })
-            .catch(error => {});
+            
+            }
+            else {
+                navigate("/listings/" + shopID);
+            }
+
         }
-        else {
-            // alert(response.data.split(":")[1])
-            navigate("/listings/" + shopID);
-        }
+        else {}
     })
     .catch(error => {
         alert("Error.")
@@ -117,6 +120,9 @@ const Home = () => {
     const [shopOwner, setShopOwner] = useState("");
     const [lastSynched, setLastSynched] = useState("");
 
+    const [apiKey, setApiKey] = useState("");
+    const [sharedSecret, setSharedSecret] = useState("");
+
     const navigate = useNavigate();
 
     const getData = () =>{
@@ -136,15 +142,30 @@ const Home = () => {
 
         event.preventDefault();
 
-        const parameters = { userEmail: localStorage.getItem("cookie_email"), shop: event.target[0].value };
+        const parameters = {
+            shop_name: event.target[0].value,
+            api_key: event.target[1].value
+        };
         const res = axios.post(defaultVariables['backend-url'] + 'etsy/get-shop-details/', parameters)
         .then(response => {
             if(response.data != "0"){
-                const parametersShopDetails = { shop_id: response.data, shop_name: event.target[0].value, shop_owner: localStorage.getItem("cookie_username") };
+
+                localStorage.setItem("current_shop_id", response.data);
+
+                const parametersShopDetails = {
+                    shop_id: response.data,
+                    shop_name: event.target[0].value,
+                    api_key: event.target[1].value,
+                    shared_secret: event.target[2].value,
+                    shop_owner: localStorage.getItem("cookie_username")
+                };
                 const res2 = axios.post(defaultVariables['backend-url'] + 'mongodb/shops/insert', parametersShopDetails)
                 .then(response2 => {
                     alert("Shop added successfully.");
                     setShopName("");
+                    setApiKey("");
+                    setSharedSecret("");
+                    navigate("/authorize");
                 })
                 .catch(error2 => {
                     alert("Failed to add the shop.");
@@ -197,6 +218,8 @@ const Home = () => {
                     <button onClick = { () => {
                             setButtonPopup(true);
                             setShopName("");
+                            setApiKey("");
+                            setSharedSecret("");
                             }
                         }
                         >Add Shop</button>
@@ -211,16 +234,15 @@ const Home = () => {
 
                                 <p className='label'>Shop Name:</p>
                                 <input className='text-field' type='text' placeholder='Shop Name' defaultValue={shopName} required />
+                                <br />
+
+                                <p className='label'>API Key:</p>
+                                <input className='text-field' type='text' placeholder='API Key' defaultValue={apiKey} required />
+                                <br />
+
+                                <p className='label'>Shared Secret:</p>
+                                <input className='text-field' type='text' placeholder='Shared Secret' defaultValue={sharedSecret} required />
                                 <br /><br />
-
-                                {/* <p className='label'>Product Description:</p>
-                                <input className='text-field' type='text' placeholder='Product Description' defaultValue={productDescription} required />
-
-                                <p className='label'>Product Price:</p>
-                                <input className='text-field' type='number' placeholder='Product Price' defaultValue={productPrice} required />
-
-                                <p className='label'>Product Stocks:</p>
-                                <input className='text-field' type='number' placeholder='Product Stocks' defaultValue={productStocks} required /> */}
 
                                 <button className='button'>Add/Update</button>
 

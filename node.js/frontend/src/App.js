@@ -5,6 +5,7 @@ import Authorize from "./components/authorize.component";
 import Home from "./components/home.component";
 import Listings from "./components/listings.component";
 import Login from './components/login.component';
+import Receipts from "./components/receipts.component";
 import Register from "./components/register.component";
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
 					<Route path="/register" element={<Register/>} />
 					<Route path="/authorize" element={<Authorize/>} />
 					<Route path="/home" element={<Home/>} />
-					<Route path="/listings/:shop_id" element={ <Listings/> } />
+					<Route path="/listings/:shop_id" element={ <Receipts/> } />
 					<Route path="*" element={<Login/>} />
 				</Routes>
 			</div>

@@ -50,22 +50,13 @@ router.route('/register').post(async (req, res)=>{
     var dataUsername = req.body.username;
     var dataPassword = req.body.password;
     var dataEmail = req.body.email;
-    var dataApiKey = req.body.api_key;
-    var dataSharedSecret = req.body.shared_secret;
 
     try{
         const hashedPassword = await bcrypt.hash(dataPassword, saltRounds);
         const insertData = await usersModel.create({
             username: dataUsername,
             password: hashedPassword,
-            email: dataEmail,
-            api_key: dataApiKey,
-            etsy_authorized: false,
-            shared_secret: dataSharedSecret,
-            access_token: '',
-            refresh_token: '',
-            time_limit: 0,
-            last_updated: new Date()
+            email: dataEmail
         });
             
         insertData.save((err, doc) => {
@@ -95,6 +86,12 @@ router.route('/shops/insert').post(async (req, res)=>{
             shop_name: req.body.shop_name,
             shop_id: req.body.shop_id,
             shop_owner: req.body.shop_owner,
+            api_key: req.body.api_key,
+            shared_secret: req.body.shared_secret,
+            etsy_authorized: false,
+            access_token: "",
+            refresh_token: "",
+            time_limit: 0,
             last_synched: new Date()
         });
             
@@ -150,32 +147,57 @@ router.route('/shops/get').get((req, res)=>{
 // Check the validity of access token.
 router.route('/token/validity').post((req, res) => {
 
-    let username = req.body.username;
+    let shopID = req.body.shop_id;
 
-    usersModel.find({ username: username}, async function (err, results) {
+    shopsModel.find({ shop_id: shopID}, async function (err, results) {
+
+        let responseType = "fail";
+        let tokenType = "access";
+        let tokenData = "";
+        let apiKey = "";
+
         if (err){
-            res.send("fail")
+            responseType = "fail";
         }
         else{
             if (!results.length){
-                res.send("fail")
+                responseType = "fail";
             }
             else{
                 let currentTime = new Date();
-                let secondsDifference = Math.abs(new Date(results[0]['last_updated']).getTime() - currentTime.getTime()) / 1000;
+                let secondsDifference = Math.abs(new Date(results[0]['last_synched']).getTime() - currentTime.getTime()) / 1000;
                 if (secondsDifference > results[0]['time_limit']){
-                    res.send("refresh:" + results[0]['refresh_token']);
+                    // res.send("refresh:" + results[0]['refresh_token']);
+                    responseType = "success";
+                    tokenType = "refresh";
+                    tokenData = results[0]['refresh_token'];
                 }
                 else{
-                    res.send("access:" + results[0]['access_token']);
+                    // res.send("access:" + results[0]['access_token']);
+                    responseType = "success";
+                    tokenType = "access";
+                    tokenData = results[0]['access_token'];
                 }
+                apiKey = results[0]['api_key'];
+
             }
         }
+
+        const responseData = {
+            response_type: responseType,
+            token_type: tokenType,
+            token_data: tokenData,
+            api_key: apiKey
+        }
+         
+        const jsonContent = JSON.stringify(responseData);
+        res.send(jsonContent);
+
     });
 
 });
 
-// Check the validity of access token.
+// [Not Used] Check the validity of access token.
 router.route('/token/get/api_key').post((req, res) => {
 
     let username = req.body.username;
@@ -200,16 +222,16 @@ router.route('/token/get/api_key').post((req, res) => {
 router.route('/update-tokens').post(async (req, res)=>{
 
     try{
-        var myQuery = { username: req.body.username };
+        var myQuery = { shop_id: req.body.shop_id };
         var newValues = { $set:
             {
                 access_token: req.body.access_token,
                 refresh_token: req.body.refresh_token,
                 time_limit: req.body.time_limit,
-                last_updated: new Date()
+                last_synched: new Date()
             }
         };
-        db.collection("users").updateOne(myQuery, newValues, function(err, resMongo) {
+        db.collection("shops").updateOne(myQuery, newValues, function(err, resMongo) {
             if (err) throw err;
             res.send("success");
         });

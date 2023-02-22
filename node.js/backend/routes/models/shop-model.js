@@ -6,6 +6,12 @@ var shopsSchema = new mongoose.Schema({
     shop_name: String,
     shop_id: Number,
     shop_owner: String,
+    api_key: String,
+    shared_secret: String,
+    etsy_authorized: Boolean,
+    access_token: String,
+    refresh_token: String,
+    time_limit: Number,
     last_synched: Date,
 });
 

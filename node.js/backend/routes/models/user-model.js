@@ -5,14 +5,7 @@ const db = require("./connect-db");
 var usersSchema = new mongoose.Schema({
     username: String,
     password: String,
-    email: String,
-    api_key: String,
-    shared_secret: String,
-    etsy_authorized: Boolean,
-    access_token: String,
-    refresh_token: String,
-    time_limit: Number,
-    last_updated: Date
+    email: String
 });
 
 var usersModel = mongoose.model('users', usersSchema);

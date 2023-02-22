@@ -30,6 +30,12 @@
     background: transparent;
 }
 
+.popup-inner .label{
+    margin-left: 20px;
+    margin-bottom: 0px;
+    text-align: left;
+}
+
 .text-field{
 	margin: 5px 5px 5px 5px;
 	width: 90%;
