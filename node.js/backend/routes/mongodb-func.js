@@ -26,12 +26,14 @@ router.route('/login').post((req, res)=>{
                     // res.cookie('email', results[0]['email'], { maxAge: 900000, httpOnly: true });
                     // console.log(req.cookies.email);
 
-                    if(results[0]['etsy_authorized']){
-                        res.send("success:" + results[0]['email']);
-                    }
-                    else{
-                        res.send("authorize:" + results[0]['email']);
-                    }
+                    // if(results[0]['etsy_authorized']){
+                    //     res.send("success:" + results[0]['email']);
+                    // }
+                    // else{
+                    //     res.send("authorize:" + results[0]['email']);
+                    // }
+
+                    res.send("success:" + results[0]['email']);
                     
                 }
                 else{

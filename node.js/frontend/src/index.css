@@ -163,3 +163,38 @@ a{
 .login-form input:focus{
   border-color: var(--color-primary);
 }
+
+
+/* RECEIPTS COMPONENT */
+/* Table */
+.scroll-div{
+  overflow-x: scroll;
+  border-left: 2px solid rgb(150, 150, 150);
+  border-right: 2px solid rgb(150, 150, 150);
+}
+
+.receipts-table{
+  /* background: rgba(235, 235, 235, 0.5); */
+  font-size: calc(var(--font-size) - 2px);
+  border-collapse: collapse;
+}
+
+.receipts-table, .receipts-table th, .receipts-table td{
+  border: 1px solid rgb(150, 150, 150);
+}
+
+.receipts-table td, .receipts-table th{
+  text-align: center;
+  padding: 10px 30px 10px 30px;
+}
+
+.receipts-table tr:hover{
+  border: 2px solid rgb(50, 50, 50);
+  box-shadow: 2px 3px 5px rgb(200, 200, 200);
+}
+
+.receipts-table th{
+  background: var(--color-gradient-1);
+  color: black;
+  font-family: var(--font-bold);
+}
