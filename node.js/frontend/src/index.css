@@ -169,14 +169,19 @@ a{
 /* Table */
 .scroll-div{
   overflow-x: scroll;
-  border-left: 2px solid rgb(150, 150, 150);
-  border-right: 2px solid rgb(150, 150, 150);
+  height: 500px;
+  border: 2px solid rgb(150, 150, 150);
 }
 
 .receipts-table{
   /* background: rgba(235, 235, 235, 0.5); */
   font-size: calc(var(--font-size) - 2px);
   border-collapse: collapse;
+}
+
+.receipts-table th{
+  position: sticky;
+  top: 0;
 }
 
 .receipts-table, .receipts-table th, .receipts-table td{

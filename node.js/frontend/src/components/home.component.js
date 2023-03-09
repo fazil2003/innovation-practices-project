@@ -73,7 +73,7 @@ const Shop = (props) => (
         <p className='owner flex-three'>{props.shop.shop_owner}</p>
         <p className='date flex-three'>{ formatDate(props.shop.last_synched) }</p>
         <p className='flex-three'>
-            <button onClick={() => viewListings(props.navigate, props.shop.shop_id)}>Get</button>
+            <button onClick={() => viewListings(props.navigate, props.shop.shop_id, props.shop.last_epoch_time)}>Get</button>
         </p>
         {/* <p className='flex-three'>
             <button onClick={() => timeDifference(props.shop.last_synched)}>Get</button>

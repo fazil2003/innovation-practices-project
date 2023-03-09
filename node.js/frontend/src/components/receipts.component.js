@@ -8,7 +8,9 @@ import Popup from './popups/shops.popup';
 
 const Receipt = (props) => (
     // class="content-list"
+
     <tr title={props.receipt.name}>
+        <td>{props.isProcessed + ''}</td>
         <td>{props.receipt.receipt_id}</td>
         <td>{props.receipt.receipt_type}</td>
         <td>{props.receipt.seller_user_id}</td>
@@ -101,6 +103,8 @@ const Receipts = (props) => {
 
     let { shop_id } = useParams();
 
+    let { lastEpochTime } = useParams();
+
     const getData = () =>{
         // let url = defaultVariables['backend-url'] + 'etsy/retrieve-data/?email=' + localStorage.getItem("cookie_email") + '&shop_id='+ shop_id +'&q=' + query;
         // alert(url);
@@ -122,9 +126,29 @@ const Receipts = (props) => {
             <>
                 {
                     result.slice(0, size).map(currentReceipt => {
+                        
+                        let isProcessed = false;
+                        if(currentReceipt.created_timestamp < lastEpochTime){
+                            isProcessed = true;
+                        }
+                        else{
+                            // Insert the receipts into the database.
+                            const tokenParameters = {
+                                receipt_id: currentReceipt.receipt_id,
+                                created_timestamp: currentReceipt.created_timestamp,
+                                updated_timestamp: currentReceipt.updated_timestamp,
+                                shop_id: shop_id,
+                                is_processed: isProcessed
+                            };
+                            axios.post(defaultVariables['backend-url'] + 'mongodb/receipts/insert', tokenParameters)
+                            .then(response4 => {})
+                            .catch(error => {});
+                        }
+
                         return <Receipt
                                     receipt = {currentReceipt}
                                     value = {query}
+                                    isProcessed = {isProcessed}
                                 />;
                     })
                 }
@@ -144,6 +168,7 @@ const Receipts = (props) => {
                     <table className='receipts-table'>
 
                     <tr>
+                        <th>Is Processed?</th>
                         <th>Receipt ID</th>
                         <th>Receipt Type</th>
                         <th>Seller User ID</th>

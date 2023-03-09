@@ -8,6 +8,7 @@ const db = require('./models/connect-db');
 var ObjectId = require('mongodb').ObjectId;
 var usersModel = require('./models/user-model');
 var shopsModel = require('./models/shop-model');
+var receiptsModel = require('./models/receipt-model');
 
 // Check the login credentials of the user.
 router.route('/login').post((req, res)=>{
@@ -94,7 +95,8 @@ router.route('/shops/insert').post(async (req, res)=>{
             access_token: "",
             refresh_token: "",
             time_limit: 0,
-            last_synched: new Date()
+            last_synched: new Date(),
+            last_epoch_time: 0
         });
             
         insertData.save((err, doc) => {
@@ -241,6 +243,46 @@ router.route('/update-tokens').post(async (req, res)=>{
     catch (error) {
         console.log(error);
         res.status(500).send("Internal Server error Occured");
+    }
+    
+});
+
+// Insert a new receipt into the database
+router.route('/receipts/insert').post(async (req, res)=>{
+
+    try{
+
+        let shopID = req.body.shop_id;
+        const insertData = await receiptsModel.create({
+            receipt_id: req.body.receipt_id,
+            created_timestamp: req.body.created_timestamp,
+            updated_timestamp: req.body.updated_timestamp,
+            shop_id: shopID,
+            is_processed: req.body.is_processed
+        });
+
+        var myQuery = { shop_id: parseInt(shopID) };
+        var newValues = { $set:
+            {
+                last_epoch_time: Math.round(new Date().getTime()/1000)
+            }
+        };
+        db.collection("shops").updateOne(myQuery, newValues, function(err, resMongo) {
+            if (err) throw err;
+        });
+            
+        insertData.save((err, doc) => {
+            if (!err){
+                res.send("success")
+            }
+            else{
+                res.send('error');
+            }
+        });
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).send("error");
     }
     
 });

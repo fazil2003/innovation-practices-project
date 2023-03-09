@@ -13,8 +13,8 @@ var shopsSchema = new mongoose.Schema({
     refresh_token: String,
     time_limit: Number,
     last_synched: Date,
+    last_epoch_time: Number
 });
 
 var shopsModel = mongoose.model('shops', shopsSchema);
-// module.exports = mongoose.model("Products", productsModel);
 module.exports = shopsModel;
