@@ -66,14 +66,18 @@ const viewListings = (navigate, shopID) => {
     });
 }
 
+
 const Shop = (props) => (
     <div class="content-list" title={props.shop.shop_name}>
         <img className='flex-one' src={process.env.PUBLIC_URL + '/images/icon-shop.png'} />
         <p className='name flex-three'>{props.shop.shop_name}</p>
         <p className='owner flex-three'>{props.shop.shop_owner}</p>
         <p className='date flex-three'>{ formatDate(props.shop.last_synched) }</p>
-        <p className='flex-three'>
-            <button onClick={() => viewListings(props.navigate, props.shop.shop_id, props.shop.last_epoch_time)}>Get</button>
+        <p className='flex-two'>
+            <button className='btn-transparent' onClick={() => viewListings(props.navigate, props.shop.shop_id, props.shop.last_epoch_time)}>Get</button>
+        </p>
+        <p className='flex-two'>
+            <button className='btn-transparent' onClick={() => props.navigate("/inventory/" + props.shop.shop_id)}>Get</button>
         </p>
         {/* <p className='flex-three'>
             <button onClick={() => timeDifference(props.shop.last_synched)}>Get</button>
@@ -215,7 +219,7 @@ const Home = () => {
             <div className='content'>
                 <div style={{ display: 'flex' }} >
                     <p className='heading' style={{ flex: 2 }}>All Shops</p>
-                    <button onClick = { () => {
+                    <button className='btn' onClick = { () => {
                             setButtonPopup(true);
                             setShopName("");
                             setApiKey("");
@@ -244,7 +248,7 @@ const Home = () => {
                                 <input className='text-field' type='text' placeholder='Shared Secret' defaultValue={sharedSecret} required />
                                 <br /><br />
 
-                                <button className='button'>Add/Update</button>
+                                <button className='btn'>Add/Update</button>
 
                             </form>
 
@@ -257,7 +261,8 @@ const Home = () => {
                     <p className='flex-three'>Shop name</p>
                     <p className='flex-three'>Owner</p>
                     <p className='flex-three'>Last synched</p>
-                    <p className='flex-three'>Listings</p>
+                    <p className='flex-two'>View Receipts</p>
+                    <p className='flex-two'>Add Inventories</p>
                 </div>
 
                 <div>

@@ -63,7 +63,7 @@ const Register = () => {
 				</div>
 				<div className='form-input'>
 					<center>
-						<button>Register</button>
+						<button className='btn'>Register</button>
 					</center>
 				</div>
                 <div className='form-input'>

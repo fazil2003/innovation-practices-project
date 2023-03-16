@@ -39,6 +39,10 @@ app.use('/etsy', etsyOAuth);
 const mongoDBFunc = require('./routes/mongodb-func');
 app.use('/mongodb', mongoDBFunc);
 
+// Inventory Management Functions
+const inventoryFunc = require('./routes/inventory-func');
+app.use('/inventory', inventoryFunc);
+
 app.listen(port, () => {
     console.log("Server is running");
 });

@@ -17,7 +17,7 @@ const Authorize = () => {
                 <center>
                     You have not authorized with Etsy. Please kindly click the button below.
                     <br /><br />
-                    <button onClick={authorizeWithEtsy}>Authorize with Etsy</button>
+                    <button className='btn' onClick={authorizeWithEtsy}>Authorize with Etsy</button>
                 </center>
 			</div>
         </div>

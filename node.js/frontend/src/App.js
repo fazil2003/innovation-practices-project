@@ -7,6 +7,7 @@ import Listings from "./components/listings.component";
 import Login from './components/login.component';
 import Receipts from "./components/receipts.component";
 import Register from "./components/register.component";
+import Inventories from "./components/inventory.component";
 
 function App() {
 	return (
@@ -19,6 +20,7 @@ function App() {
 					<Route path="/authorize" element={<Authorize/>} />
 					<Route path="/home" element={<Home/>} />
 					<Route path="/listings/:shop_id" element={ <Receipts/> } />
+					<Route path="/inventory/:shop_id" element={ <Inventories/> } />
 					<Route path="*" element={<Login/>} />
 				</Routes>
 			</div>
