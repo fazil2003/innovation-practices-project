@@ -253,13 +253,8 @@ router.route('/receipts/insert').post(async (req, res)=>{
     try{
 
         let shopID = req.body.shop_id;
-        const insertData = await receiptsModel.create({
-            receipt_id: req.body.receipt_id,
-            created_timestamp: req.body.created_timestamp,
-            updated_timestamp: req.body.updated_timestamp,
-            shop_id: shopID,
-            is_processed: req.body.is_processed
-        });
+
+        const insertData = await receiptsModel.create(req.body);
 
         var myQuery = { shop_id: parseInt(shopID) };
         var newValues = { $set:
@@ -285,6 +280,34 @@ router.route('/receipts/insert').post(async (req, res)=>{
         res.status(500).send("error");
     }
     
+});
+
+// Request to Retrieve the receipts.
+router.route('/receipts/get').get(async (req, res) => {
+    let q = "";
+    let shopID = req.query.shop_id;
+    if(req.query.q){
+
+        q = req.query.q;
+
+        receiptsModel.find({shop_id: parseInt(shopID)}, (err, docs) => {
+            if (!err) {
+                res.send(docs);
+            } else {
+                console.log('Failed to retrieve the Course List: ' + err);
+            }
+        });    
+
+    }
+    else{
+        receiptsModel.find({shop_id: parseInt(shopID)}, (err, docs) => {
+            if (!err) {
+                res.send(docs);
+            } else {
+                console.log('Failed to retrieve the Course List: ' + err);
+            }
+        });    
+    }
 });
 
 module.exports = router;

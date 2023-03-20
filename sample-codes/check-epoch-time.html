@@ -1,0 +1,38 @@
+<script>
+function timestampToDate(UNIX_timestamp){
+  var a = new Date(UNIX_timestamp * 1000);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var year = a.getFullYear();
+  var month = months[a.getMonth()];
+  var date = a.getDate();
+  var hour = a.getHours();
+  var min = a.getMinutes();
+  var sec = a.getSeconds();
+  var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+  return time;
+}
+
+function dateToTimestamp(date){
+    return Math.round(new Date(date).getTime()/1000);
+}
+
+// document.write(timeConverter(1638535502));
+// var dateString = new Date('2023-02-22T13:17:43.268+00:00');
+// document.write(dateString.toString());
+// document.write("<br>");
+// var timestamp = dateToTimestamp(dateString);
+// document.write(timestamp);
+// document.write("<br>");
+// var date = timestampToDate(timestamp);
+// document.write(date);
+
+var old = 1638535502;
+var dateString = new Date('2023-02-22T13:17:43.268+00:00');
+var timestamp = dateToTimestamp(dateString);
+if (timestamp > old) {
+    document.write("New");
+}
+else{
+    document.write("Old");
+}
+</script>

@@ -10,7 +10,7 @@ const Receipt = (props) => (
     // class="content-list"
 
     <tr title={props.receipt.name}>
-        <td>{props.isProcessed + ''}</td>
+        <td>{props.receipt.isProcessed + ''}</td>
         <td>{props.receipt.receipt_id}</td>
         <td>{props.receipt.receipt_type}</td>
         <td>{props.receipt.seller_user_id}</td>
@@ -103,12 +103,8 @@ const Receipts = (props) => {
 
     let { shop_id } = useParams();
 
-    let { lastEpochTime } = useParams();
-
     const getData = () =>{
-        // let url = defaultVariables['backend-url'] + 'etsy/retrieve-data/?email=' + localStorage.getItem("cookie_email") + '&shop_id='+ shop_id +'&q=' + query;
-        // alert(url);
-        const res = axios.get(defaultVariables['backend-url'] + 'etsy/retrieve-receipts/?shop_id='+ shop_id +'&q=' + query);
+        const res = axios.get(defaultVariables['backend-url'] + 'mongodb/receipts/get/?shop_id='+ shop_id +'&q=' + query);
         return res;
     }
 
@@ -128,22 +124,26 @@ const Receipts = (props) => {
                     result.slice(0, size).map(currentReceipt => {
                         
                         let isProcessed = false;
-                        if(currentReceipt.created_timestamp < lastEpochTime){
-                            isProcessed = true;
-                        }
-                        else{
-                            // Insert the receipts into the database.
-                            const tokenParameters = {
-                                receipt_id: currentReceipt.receipt_id,
-                                created_timestamp: currentReceipt.created_timestamp,
-                                updated_timestamp: currentReceipt.updated_timestamp,
-                                shop_id: shop_id,
-                                is_processed: isProcessed
-                            };
-                            axios.post(defaultVariables['backend-url'] + 'mongodb/receipts/insert', tokenParameters)
-                            .then(response4 => {})
-                            .catch(error => {});
-                        }
+                        // if(currentReceipt.created_timestamp < lastEpochTime){
+                        //     isProcessed = true;
+                        // }
+                        // else{
+                        //     // Insert the receipts into the database.
+                        //     const tokenParameters = {
+                        //         receipt_id: currentReceipt.receipt_id,
+                        //         created_timestamp: currentReceipt.created_timestamp,
+                        //         updated_timestamp: currentReceipt.updated_timestamp,
+                        //         shop_id: shop_id,
+                        //         is_processed: isProcessed
+                        //     };
+
+                        //     var modifiedReceipt = currentReceipt;
+                        //     modifiedReceipt['isProcessed'] = true;
+
+                        //     axios.post(defaultVariables['backend-url'] + 'mongodb/receipts/insert', modifiedReceipt)
+                        //     .then(response4 => {})
+                        //     .catch(error => {});
+                        // }
 
                         return <Receipt
                                     receipt = {currentReceipt}
@@ -156,11 +156,22 @@ const Receipts = (props) => {
         )
     }
 
+    const getReceiptsFromEtsy = () => {
+        axios.get(defaultVariables['backend-url'] + 'etsy/retrieve-receipts/?shop_id='+ shop_id +'&q=' + query)
+        .then(response => {
+			alert(response.data)
+		})
+		.catch(error => {
+			alert("Error.")
+		});
+    }
+
     return (
         <div className='container'>
             <div className='content'>
                 <div style={{ display: 'flex' }} >
-                    <p className='heading'>Receipts</p>
+                    <p className='heading' style={{ flex: 2 }}>All Receipts</p>
+                    <button className='btn' onClick = { () => { getReceiptsFromEtsy() } } >Retrieve Data</button>
                 </div>
                 
                 <div className='scroll-div'>

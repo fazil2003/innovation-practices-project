@@ -1,7 +1,11 @@
 var mongoose = require('mongoose');
 mongoose.set('strictQuery', true);
 
-mongoose.connect('mongodb://127.0.0.1:27017/etsy-api', {useNewUrlParser: true, useUnifiedTopology: true});
+// MongoDB Compass
+// mongoose.connect('mongodb://127.0.0.1:27017/etsy-api', {useNewUrlParser: true, useUnifiedTopology: true});
+
+// MongoDB Atlas
+mongoose.connect('mongodb+srv://fazil2003:fazil2003@boston-project.czhigul.mongodb.net/?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology: true});
 
 var conn = mongoose.connection;
 

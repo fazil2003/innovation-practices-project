@@ -188,6 +188,7 @@ a{
 /* RECEIPTS COMPONENT */
 /* Table */
 .scroll-div{
+  margin-top: 20px;
   overflow-x: scroll;
   height: 500px;
   border: 2px solid rgb(150, 150, 150);

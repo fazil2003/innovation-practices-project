@@ -6,6 +6,7 @@ var defaultVariables = require('./variables/variables');
 
 var usersModel = require('./models/user-model');
 var shopsModel = require('./models/shop-model');
+const receiptsModel = require('./models/receipt-model');
 
 router.route('/').get((req, res) => {
     res.sendFile(path.join(__dirname, '../views/etsy-auth.html'));
@@ -249,11 +250,14 @@ router.route('/get-shop-details').post(async (req, res) => {
 
 // Request to Retrieve the receipts.
 router.route('/retrieve-receipts').get(async (req, res) => {
+
     var shopID = req.query.shop_id;
-    shopsModel.find({$or:[{ 'shop_id': shopID }]}, async (err, docs) => {
+
+    shopsModel.find({$or:[{ 'shop_id': parseInt(shopID) }]}, async (err, docs) => {
         if (!err) {
             var access_token = docs[0]['access_token'];
             var apiKey = docs[0]['api_key'];
+            var lastEpochTime = docs[0]['last_epoch_time'];
             const user_id = access_token.split('.')[0];
             const requestOptions = {
                 headers: {
@@ -269,10 +273,41 @@ router.route('/retrieve-receipts').get(async (req, res) => {
             );
 
             if (response.ok) {
+
                 const listData = await response.json();
-                res.send(listData['results']);
-            } else {
-                res.send("oops");
+
+                listData["results"].forEach(async function(receiptData) {
+                    
+                    try{
+                        if (receiptData["created_timestamp"] > lastEpochTime){
+                            receiptData["isProcessed"] = true;
+                            receiptData["shop_id"] = parseInt(shopID);
+                            // const insertData = await receiptsModel.create(receiptData);
+                            new receiptsModel(receiptData).save();
+                        }
+                    
+                    }
+                    catch (error) {}
+
+                });
+
+                var myQuery = { shop_id: parseInt(shopID) };
+                var newValues = { $set:
+                    {
+                        last_epoch_time: Math.round(new Date().getTime()/1000)
+                    }
+                };
+
+                db.collection("shops").updateOne(myQuery, newValues, function(err, resMongo) {
+                    if (err) throw err;
+                });
+
+                // res.send(listData['results']);
+                res.send("Data retrieved successfully.");
+
+            }
+            else {
+                res.send("Failed to retrieve the data.");
             }
             
         } else {
